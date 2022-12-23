@@ -9,17 +9,22 @@ const should = chai.should()
 passportStub.install(server)
 
 
-const should401 = done => (err, res) => {
-  should.not.exist(err)
+const should401 = res => {
   res.redirects.length.should.eql(0)
   res.status.should.eql(401)
   res.type.should.eql('application/json')
   res.body.error.should.eql('UNAUTHENTICATED')
-  done()
 }
 
-const shouldSucceed = (err, res) => {
-  should.not.exist(err)
+const shouldFail = (res, status) => {
+  res.redirects.length.should.eql(0)
+  res.status.should.not.eql(200)
+  if(status) {
+    res.status.should.eql(status)
+    if(status == 401) res.body.error.should.eql('UNAUTHENTICATED')
+  }
+}
+const shouldSucceed = res => {
   res.redirects.length.should.eql(0)
   res.status.should.eql(200)
   res.type.should.eql('application/json')
@@ -41,4 +46,4 @@ async function afterEach(){
   return knex.migrate.rollback()
 }
 
-module.exports = { should401, userCredentials, beforeEach, afterEach, shouldSucceed }
+module.exports = { should401, userCredentials, beforeEach, afterEach, shouldSucceed, shouldFail }

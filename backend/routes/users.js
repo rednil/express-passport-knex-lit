@@ -8,18 +8,26 @@ var router = express.Router()
 
 /* GET users listing. */
 router.get('/', loginRequired, async (req, res, next) => {
-  try{
     const users = await knex('users').select({
       id: 'id',
       username: 'username',
       role: 'role'
     })
     return res.json(users);
-  }catch(err){
-    console.error(err);
-    return res.json({success: false, message: 'An error occurred, please try again later.'})
+  
+})
+
+router.get('/:id', loginRequired, async (req, res, next) => {
+  const { id } = req.params
+  try{
+    const users = await knex('users').where({ id })
+    if(!users.length) res.status(404).json({error: 'ID_UNKNOWN'})
+    else res.json(users[0])
+  }catch(e){
+    next(e)
   }
 })
+
 router.delete('/:id', adminRequired, async (req, res, next) => {
   const { id } = req.params
   try{

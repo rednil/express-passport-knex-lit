@@ -47,9 +47,12 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
-  console.error('test:', typeof err, err)
-  res.status(err.status || 500)
-  if(environment == 'development') res.json({stack: err.stack.split('\n')})
+  console.error('error', err)
+  const body = {
+    error: err.message
+  }
+  if(environment == 'development') body.stack = err.stack.split('\n')
+  res.status(err.status || 500).json(body)
 })
 
 module.exports = app
