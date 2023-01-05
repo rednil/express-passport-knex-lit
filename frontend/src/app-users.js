@@ -84,7 +84,7 @@ export class AppUsers extends LitElement {
       </div>
       <mwc-dialog ${ref(this.deleteDialog)}>
         <div>Delete User "${this.selected?.username}"</div>
-        <mwc-button
+        <mwc-button @click=${this.deleteUser}
             slot="primaryAction"
             dialogAction="discard">
           Delete
@@ -124,31 +124,46 @@ export class AppUsers extends LitElement {
     this.selected = evt.target.data
     this.deleteDialog.value.open = true
   }
-  
 
   async fetchUsers(){
     const response = await fetch('/api/users')
-    if(response.status == 200) {
+    if(this.noError(response)) {
       this.users = await response.json()
     }
   }
-  /*
-  async deleteUser(evt){
-    const id = evt.target.getAttribute('data')
-    console.log('delete user', id)
-    const response = await fetch(`/api/users/${id}`, { method: 'DELETE' })
-    if(response.status == 200){
-      this.users.splice(this.users.findIndex(user => user.id == id),1)
-      this.requestUpdate()
-    }
+
+  noError(response){
+    if(response.status == 200) return true
     else {
       this.dispatchEvent(new CustomEvent('error', { detail: response }))
     }
   }
-  */
+  
+  async deleteUser(evt){
+    const id = this.selected.id
+    const response = await fetch(`/api/users/${id}`, { method: 'DELETE' })
+    if(this.noError(response)) {
+      this.users.splice(this.users.findIndex(user => user.id == id),1)
+      this.requestUpdate()
+    }
+  }
+  
   async userAction(){
-    this.shadowRoot.querySelector('app-auth').send()
+    const response = await this.shadowRoot.querySelector('app-auth').send()
+    if(this.noError(response)) {
+      const updatedUsers = await response.json()
+      this.mergeUsers(updatedUsers)
+    }
+  }
 
+  mergeUsers(updatedUsers = []){
+    if(!Array.isArray(updatedUsers)) updatedUsers = [updatedUsers]
+    updatedUsers.forEach(updatedUser => {
+      const idx = this.users.findIndex(user => user.id == updatedUser.id)
+      if(idx >= 0) this.users[idx] = updatedUser
+      else this.users.push(updatedUser)
+      this.requestUpdate()
+    })
   }
   getUserDialogTitle(){
     return this.mode == AppAuth.EDIT ? `Edit User "${this.selected.username}"` : 'Create User'

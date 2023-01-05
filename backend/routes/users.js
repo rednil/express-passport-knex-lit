@@ -1,13 +1,11 @@
 var express = require('express')
 const knex = require("../helpers/knex")
-const loginRequired = require('../auth/loginRequired')
-const adminRequired = require('../auth/adminRequired')
-const createUser = require('../auth/createUser')
+const auth = require('../helpers/auth')
 
 var router = express.Router()
 
 /* GET users listing. */
-router.get('/', loginRequired, async (req, res, next) => {
+router.get('/', auth.loginRequired, async (req, res, next) => {
     const users = await knex('users').select({
       id: 'id',
       username: 'username',
@@ -17,7 +15,7 @@ router.get('/', loginRequired, async (req, res, next) => {
   
 })
 
-router.get('/:id', loginRequired, async (req, res, next) => {
+router.get('/:id', auth.loginRequired, async (req, res, next) => {
   const { id } = req.params
   try{
     const users = await knex('users').where({ id })
@@ -28,23 +26,42 @@ router.get('/:id', loginRequired, async (req, res, next) => {
   }
 })
 
-router.delete('/:id', adminRequired, async (req, res, next) => {
+router.delete('/:id', auth.adminRequired, async (req, res, next) => {
   const { id } = req.params
   try{
     const del = await knex('users').where({ id }).del()
-    console.log('delete user', id) 
-    res.send()
+    res.json()
   }catch(e){
     res.status(500).send({error: 'Delete failed'})
   }
 })
-router.post('/', adminRequired, async (req, res, next) => {
-  return createUser(req, res)
- 
+router.post('/', auth.adminRequired, async (req, res, next) => {
+  try{
+    const user = await auth.createUser(req, res)
+    res.json(user)
+  }catch(e) {
+    next(e)
+  }
 })
-router.put('/', adminRequired, (req, res, next) => {
-  console.log('put', req)
+router.put('/:id', auth.adminRequired, async (req, res, next) => {
+  try{
+    const user = await modifyUser(req.params.id, req.body)
+    res.json(user)
+  }catch(e) {
+    next(e)
+  }
 })
+
+const modifyUser = async (id, changes) => {
+  if(changes.password) {
+    changes.password = auth.getHash(changes.password)
+  }
+  changes.updated_at = new Date().getTime()
+  const count = await knex('users').where({ id }).update(changes)
+  const user = await knex('users').where({ id }).first()
+  delete user.password
+  return user
+}
 
 
 module.exports = router

@@ -32,7 +32,13 @@ const shouldSucceed = res => {
 
 const userCredentials = {
   username: 'user',
-  password: 'userpass'
+  password: 'userpass',
+  role: 'USER'
+}
+const adminCredentials = {
+  username: 'admin',
+  password: 'adminpass',
+  role: 'ADMIN'
 }
 
 async function beforeEach(){
@@ -46,4 +52,4 @@ async function afterEach(){
   return knex.migrate.rollback()
 }
 
-module.exports = { should401, userCredentials, beforeEach, afterEach, shouldSucceed, shouldFail }
+module.exports = { should401, userCredentials, beforeEach, afterEach, shouldSucceed, shouldFail, adminCredentials }

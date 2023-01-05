@@ -10,8 +10,8 @@ chai.use(chaiHttp)
 passportStub.install(server)
 
 async function getUser(){
-  const users = await knex('users').where({username: helpers.userCredentials.username})
-  return users[0]
+  const user = await knex('users').where({username: helpers.userCredentials.username}).first()
+  return user
 }
 describe('routes : users', () => {
 
@@ -38,8 +38,6 @@ describe('routes : users', () => {
       const res = await chai.request(server).get(`/api/users/${user.id}`)
       helpers.shouldSucceed(res)
       res.body.username.should.eql(user.username)
-      //  console.log('done')
-        //done()
     })
     it('should throw an error if a user is not logged in', async () => {
       const user = await getUser()
@@ -52,4 +50,78 @@ describe('routes : users', () => {
       helpers.shouldFail(res, 404)
     })
   })
+  describe('DELETE /users/:id', () => {
+    it('should delete the respective user', async() => {
+      const user = await getUser()
+      passportStub.login(helpers.adminCredentials)
+      const res = await chai.request(server).delete(`/api/users/${user.id}`)
+      helpers.shouldSucceed(res)
+      const deletedUser = await getUser()
+      should.not.exist(deletedUser)
+    })
+    it('should throw an error if a user is not logged in', async() => {
+      const user = await getUser()
+      const res = await chai.request(server).delete(`/api/users/${user.id}`)
+      helpers.shouldFail(res, 401)
+      const deletedUser = await getUser()
+      should.exist(deletedUser)
+    })
+    it('should throw an error if called by user without admin privileges', async() => {
+      const user = await getUser()
+      passportStub.login(helpers.userCredentials)
+      const res = await chai.request(server).delete(`/api/users/${user.id}`)
+      helpers.shouldFail(res, 403)
+      const deletedUser = await getUser()
+      should.exist(deletedUser)
+    })
+  })
+  describe('POST /users/', () => {
+    it('should create the respective user', async() => {
+      const user = {
+        username: 'Quert Zuiopü',
+        password: 'sEcrEt',
+        role: 'USER'
+      }
+      passportStub.login(helpers.adminCredentials)
+      const res = await chai.request(server).post(`/api/users/`).send(user)
+      helpers.shouldSucceed(res)
+      res.body[0].id.should.be.a('number')
+      res.body[0].username.should.eql(user.username)
+      res.body[0].role.should.eql(user.role)
+    })
+    
+  })
+  describe('PUT /users/:id', () => {
+    it('should modify the respective user', async() => {
+      const changes = {
+        username: 'Quert Zuiopü',
+        password: 'sEcrEt',
+        role: 'ADMIN'
+      }
+      const user = await getUser()
+      passportStub.login(helpers.adminCredentials)
+      const res = await chai.request(server).put(`/api/users/${user.id}`).send(changes)
+      helpers.shouldSucceed(res)
+      res.body.id.should.eql(user.id)
+      res.body.username.should.eql(changes.username)
+      res.body.role.should.eql(changes.role)
+      const modifiedUser = await knex('users').where({id: user.id}).first()
+      modifiedUser.password.should.not.equal(user.password)
+    })
+    it('should keep unchanged properties', async() => {
+      const changes = {
+        username: 'Quert Zuiopü',
+      }
+      const user = await getUser()
+      passportStub.login(helpers.adminCredentials)
+      const res = await chai.request(server).put(`/api/users/${user.id}`).send(changes)
+      helpers.shouldSucceed(res)
+      res.body.id.should.eql(user.id)
+      res.body.username.should.eql(changes.username)
+      res.body.role.should.eql(user.role)
+      const modifiedUser = await knex('users').where({id: user.id}).first()
+      modifiedUser.password.should.equal(user.password)
+    })
+  })
+
 })

@@ -1,9 +1,9 @@
 var express = require('express')
-const loginRequired = require('../auth/loginRequired')
+const auth = require('../helpers/auth')
 var router = express.Router()
 
 /* GET your own user account. */
-router.get('/', loginRequired, (req, res, next) => {
+router.get('/', auth.loginRequired, (req, res, next) => {
   const { username, role } = req.user  
   res.json({username, role})
 })

@@ -40,10 +40,12 @@ export class AppAuth extends LitElement {
     return html`
       <mwc-textfield id="username" label="Username" value=${this.user?.username}></mwc-textfield>
       <mwc-textfield id="password" label="Password" placeholder=${this.user?.id?'Keep existing':''}></mwc-textfield>
-      <mwc-select id="role" label="Role" ${ref(this.roleRef)} value=${this.user?.role || 'USER'}>
-        <mwc-list-item value='USER'>User</mwc-list-item>
-        <mwc-list-item value='ADMIN'>Admin</mwc-list-item>   
-      </mwc-select>
+      ${this.mode == AppAuth.CREATE || this.mode == AppAuth.EDIT ? html`
+        <mwc-select id="role" label="Role" ${ref(this.roleRef)} value=${this.user?.role || 'USER'}>
+          <mwc-list-item value='USER'>User</mwc-list-item>
+          <mwc-list-item value='ADMIN'>Admin</mwc-list-item>   
+        </mwc-select>
+      `:''}
     `
   }
 
@@ -51,7 +53,7 @@ export class AppAuth extends LitElement {
     const data = {...this.user}
     ;['username', 'password', 'role'].forEach(prop => {
       const dom = this.shadowRoot.querySelector('#'+prop)
-      if(dom.value) data[prop] = dom.value 
+      if(dom?.value) data[prop] = dom.value 
     })
     return data
   }
@@ -68,9 +70,10 @@ export class AppAuth extends LitElement {
         break
       case AppAuth.EDIT:
         method = 'PUT'
+        path = `api/users/${this.user.id}`
         break
     }
-    return console.log(method, path, data)
+    //return console.log(method, path, data)
     const response = await fetch(path, {
       headers: {
         'Accept': 'application/json',
@@ -79,6 +82,7 @@ export class AppAuth extends LitElement {
       method,
       body: JSON.stringify(data)
     })
+    return response
   }
  
 }

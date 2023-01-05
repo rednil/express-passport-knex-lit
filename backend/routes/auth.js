@@ -1,11 +1,10 @@
 const express = require('express')
 const router = express.Router()
-const loginRequired = require('../auth/loginRequired')
-const createUser = require('../auth/createUser')
+const auth = require('../helpers/auth')
 const passport = require('../auth/local')
 
 router.post('/register', (req, res, next)  => {
-  return createUser(req, res)
+  return auth.createUser(req, res)
   .then((response) => {
     return login(req, res, next)
   })
@@ -29,7 +28,7 @@ function login(req, res, next){
 
 router.post('/login', login)
 
-router.delete('/login', loginRequired, (req, res, next) => {
+router.delete('/login', auth.loginRequired, (req, res, next) => {
   req.logout(() => successResponse(res))
 })
 

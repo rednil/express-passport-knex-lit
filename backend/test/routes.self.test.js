@@ -8,7 +8,7 @@ const should = chai.should()
 chai.use(chaiHttp)
 passportStub.install(server)
 
-describe.skip('routes : self', () => {
+describe('routes : self', () => {
 
   beforeEach(helpers.beforeEach)
   afterEach(helpers.afterEach)
