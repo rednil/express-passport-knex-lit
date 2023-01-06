@@ -122,6 +122,27 @@ describe('routes : users', () => {
       const modifiedUser = await knex('users').where({id: user.id}).first()
       modifiedUser.password.should.equal(user.password)
     })
+    it('should throw an error if a user is not logged in', async() => {
+      const changes = {
+        username: 'Quert Zuiopü',
+      }
+      const user = await getUser()
+      const res = await chai.request(server).put(`/api/users/${user.id}`).send(changes)
+      helpers.shouldFail(res, 401)
+      const modifiedUser = await knex('users').where({id: user.id}).first()
+      modifiedUser.username.should.equal(user.username)
+    })
+    it('should throw an error if called by user without admin privileges', async() => {
+      const changes = {
+        username: 'Quert Zuiopü',
+      }
+      const user = await getUser()
+      passportStub.login(helpers.userCredentials)
+      const res = await chai.request(server).put(`/api/users/${user.id}`).send(changes)
+      helpers.shouldFail(res, 403)
+      const modifiedUser = await knex('users').where({id: user.id}).first()
+      modifiedUser.username.should.equal(user.username)
+    })
   })
 
 })

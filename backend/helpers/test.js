@@ -49,7 +49,7 @@ async function beforeEach(){
 
 async function afterEach(){
   passportStub.logout()
-  return knex.migrate.rollback()
+  await knex.migrate.rollback()
 }
 
 module.exports = { should401, userCredentials, beforeEach, afterEach, shouldSucceed, shouldFail, adminCredentials }

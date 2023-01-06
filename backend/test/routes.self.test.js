@@ -19,6 +19,7 @@ describe('routes : self', () => {
       const res = await chai.request(server).get('/api/self')
       helpers.shouldSucceed(res)
       res.body.username.should.eql(helpers.userCredentials.username)
+      passportStub.logout()
     })
     it('should throw an error if a user is not logged in', async () => {
       const res = await chai.request(server).get('/api/self')

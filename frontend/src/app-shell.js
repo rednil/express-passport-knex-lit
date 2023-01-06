@@ -109,7 +109,7 @@ export class AppShell extends LitElement {
         <span slot="subtitle">Navigation</span>
         <app-menu></app-menu>
         <div class="appContent" slot="appContent">
-            <mwc-top-app-bar>
+            <mwc-top-app-bar role="toolbar">
               <mwc-icon-button @click=${this.toggleNav} icon="menu" slot="navigationIcon"></mwc-icon-button>
               <div slot="title">My App</div>
               <mwc-item slot="actionItems">${this.self?.username}</mwc-item>

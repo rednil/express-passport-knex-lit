@@ -5,15 +5,19 @@ const bcrypt = require('bcrypt')
  */
 exports.seed = async function(knex) {
   // Deletes ALL existing entries
-  await knex('users').del()
+  //await knex('users').del()
+  const admin = await knex('users').where({role: 'ADMIN'}).first()
+  if(admin) return
+  const username = process.env.ADMIN_USERNAME || 'admin'
+  const password = process.env.ADMIN_PASSWORD || 'admin'
   const salt = bcrypt.genSaltSync();
-  const hash = bcrypt.hashSync('admin', salt);
+  const hash = bcrypt.hashSync(password, salt);
   await knex('users').insert([
     {
-	username: 'admin', 
-	password: hash, 
-	role: 'ADMIN', 
-	created_at: new Date().getTime()
+      username, 
+      password: hash, 
+      role: 'ADMIN', 
+      created_at: new Date().getTime()
     },
   ]);
 };
