@@ -53,12 +53,10 @@ jobs:
         [ "$VERSION" == "main" ] && VERSION=latest
         echo IMAGE_ID=$IMAGE_ID
         echo VERSION=$VERSION
-        docker tag express-lit $IMAGE_ID:${{ steps.autotag.outputs.version }}
-        docker tag express-lit $IMAGE_ID:$VERSION
+        docker tag express-passport-knex-lit $IMAGE_ID:${{ steps.autotag.outputs.version }}
+        docker tag express-passport-knex-lit $IMAGE_ID:$VERSION
         docker push $IMAGE_ID:$VERSION
         docker push $IMAGE_ID:${{ steps.autotag.outputs.version }}
-        #docker tag express-lit $IMAGE_ID:$VERSION
-        #docker push $IMAGE_ID:$VERSION
         
       env:
         CI: true

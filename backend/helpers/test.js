@@ -44,7 +44,7 @@ const adminCredentials = {
 async function beforeEach(){
   await knex.migrate.rollback()
   await knex.migrate.latest()
-  await knex.seed.run()
+  await knex.seed.run({specific: 'create_users.js'})
 }
 
 async function afterEach(){

@@ -1,18 +1,20 @@
 var createError =   require('http-errors')
 var express =       require('express')
 var path =          require('path')
-var cookieParser =  require('cookie-parser')
 var logger =        require('morgan')
 const session =     require('express-session')
+const KnexStore =   require('connect-session-knex')(session);
 const passport =    require('passport')
-
+const knex =        require('./helpers/knex')
 var indexRouter =   require('./routes/index')
 var selfRouter =    require('./routes/self')
-var usersRouter =    require('./routes/users')
+var usersRouter =   require('./routes/users')
 var authRouter =    require('./routes/auth')
 
 const environment = process.env.NODE_ENV = process.env.NODE_ENV || 'development'
 console.log('NODE_ENV', process.env.NODE_ENV)
+const store = new KnexStore({knex}); 
+
 var app = express();
 
 // view engine setup
@@ -22,15 +24,15 @@ app.set('view engine', 'jade')
 if(environment != 'test') app.use(logger('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
-app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
 //app.use('/', indexRouter);
 
 app.use(session({
-  secret: 'TODO',
+  secret: process.env.SESSION_SECRET || 'Keyboard Cat',
   resave: false,
-  saveUninitialized: true
+  saveUninitialized: true,
+  store
 }))
 
 app.use(passport.initialize())

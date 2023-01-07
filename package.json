@@ -1,7 +1,7 @@
 {
-  "name": "express-lit-docker",
+  "name": "express-passport-knex-lit",
   "version": "0.0.1",
-  "description": "A fullstack starter for little projects based on express and lit, automatically packed into a docker container using a github action.",
+  "description": "A fullstack starter for little projects requiring authentication and user management. Based on express, passport, knex and lit, automatically packed into a docker container using a github action.",
   "main": "index.js",
   "scripts": {
     "test": "npm run test:frontend; npm run test:backend",
@@ -9,13 +9,13 @@
     "test:backend": "cd backend; npm run test",
     "build": "cd frontend; npm run build",
     "start": "cd frontend; npm start & cd ../backend; npm start",
-    "docker:build": "cp -a frontend/dist/* backend/public; docker build backend --tag express-lit --file Dockerfile",
-    "docker:serve": "docker run -p 8765:80 express-lit -d; xdg-open http://localhost:8765",
+    "docker:build": "cp -a frontend/dist backend/public; docker build backend --tag express-passport-knex-lit --file Dockerfile",
+    "docker:serve": "docker run -it -p 8080:80 express-passport-knex-lit; xdg-open http://localhost:8080",
     "cleaninstall": "cd frontend; npm ci && cd ../backend; npm ci"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rednil/express-lit-docker.git"
+    "url": "git+https://github.com/rednil/express-passport-knex-lit.git"
   },
   "keywords": [
     "express",
